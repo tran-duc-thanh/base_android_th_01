@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,9 +19,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder>{
 
     private List<Item> items;
+    private ItemListener itemListener;
 
     public ItemAdapter(List<Item> items) {
         this.items = items;
+    }
+
+    public void setItemListener(ItemListener itemListener) {
+        this.itemListener = itemListener;
     }
 
     @NonNull
@@ -36,6 +42,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         if (item == null) return;
         holder.circleImageView.setImageResource(item.getImg());
         holder.textView.setText(item.getName());
+        holder.btnDelete.setOnClickListener(view -> {
+            items.remove(position);
+            notifyDataSetChanged();
+        });
     }
 
     @Override
@@ -43,23 +53,44 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         return items == null ? 0 : items.size();
     }
 
-    public class ItemViewHolder extends RecyclerView.ViewHolder {
+    public Item getItem (int position) {return items.get(position);}
+
+    public void addItem (Item item) {
+        if (item != null) items.add(item);
+        notifyDataSetChanged();
+    }
+
+    public void setItem (Item item, int position) {
+        if (item != null) items.set(position, item);
+        notifyDataSetChanged();
+    }
+
+    public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         private CircleImageView circleImageView;
         private TextView textView;
-        private Button btnEdit;
-        private Button btnDelete;
+        private ImageButton btnDelete;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             initView(itemView);
+            itemView.setOnClickListener(this);
         }
 
         private void initView (View view) {
             circleImageView = view.findViewById(R.id.img);
             textView = view.findViewById(R.id.textItem);
-            btnEdit = view.findViewById(R.id.btnEdit);
             btnDelete = view.findViewById(R.id.btnDelete);
         }
+
+        @Override
+        public void onClick(View view) {
+            if (itemListener != null)
+                itemListener.onClickItem(view, getAdapterPosition());
+        }
+    }
+
+    public interface ItemListener {
+        void onClickItem (View view, int position);
     }
 }

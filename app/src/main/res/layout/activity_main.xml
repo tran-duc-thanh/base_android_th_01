@@ -19,11 +19,11 @@
 
     <TextView
         android:id="@+id/tvId"
+        android:text="Form add item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:gravity="center"
-        android:text="ID: 5"
         app:layout_constraintTop_toBottomOf="@id/tvAppName" />
 
     <EditText
@@ -128,7 +128,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/radioGroup" />
 
-    <AutoCompleteTextView
+    <EditText
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

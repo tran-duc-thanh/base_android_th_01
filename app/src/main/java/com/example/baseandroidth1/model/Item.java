@@ -1,31 +1,25 @@
 package com.example.baseandroidth1.model;
 
+import com.example.baseandroidth1.R;
+
 public class Item {
 
-    public static int count = 0;
-
-    private Integer id;
     private int img;
+    private int position;
     private String name;
     private String content;
     private String date;
     private Boolean gender;
 
     public Item() {
-        this.id = ++count;
     }
 
-    public Item(int img, String name, String content, String date, Boolean gender) {
-        this.img = img;
-        this.id = ++count;
+    public Item(String name, String content, String date, Boolean gender) {
+        this.img = gender ? R.drawable.icon_male : R.drawable.icon_girl;
         this.name = name;
         this.content = content;
         this.date = date;
         this.gender = gender;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public int getImg() {
@@ -34,6 +28,14 @@ public class Item {
 
     public void setImg(int img) {
         this.img = img;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public String getName() {
