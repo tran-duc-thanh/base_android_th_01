@@ -1,28 +1,36 @@
 package com.example.baseandroidth1.model;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.baseandroidth1.R;
+import com.example.baseandroidth1.utils.DialogUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder>{
 
+    private static final String NOTIFY = "Thông báo";
+    private static final String MESSAGE_NOTIFY_DELETE = "Xác nhận xóa item";
+
+    private Context context;
     private List<Item> items;
     private ItemListener itemListener;
 
-    public ItemAdapter(List<Item> items) {
-        this.items = items;
+    public ItemAdapter(Context context) {
+        items = new ArrayList<>();
+        this.context = context;
     }
 
     public void setItemListener(ItemListener itemListener) {
@@ -42,10 +50,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         if (item == null) return;
         holder.circleImageView.setImageResource(item.getImg());
         holder.textView.setText(item.getName());
-        holder.btnDelete.setOnClickListener(view -> {
-            items.remove(position);
-            notifyDataSetChanged();
-        });
+        holder.btnDelete.setOnClickListener(view -> removeItem(position));
     }
 
     @Override
@@ -54,6 +59,19 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     }
 
     public Item getItem (int position) {return items.get(position);}
+
+    public void removeItem (int position) {
+        Item item = items.get(position);
+        AlertDialog.Builder builder = DialogUtils.createAlertDialog(context, NOTIFY,
+                String.format("%s: %s", MESSAGE_NOTIFY_DELETE, item.getName()), R.drawable.icon_notify);
+        builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+            items.remove(position);
+            notifyDataSetChanged();
+        });
+        builder.setNegativeButton("No", (dialogInterface, i) -> {});
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
 
     public void addItem (Item item) {
         if (item != null) items.add(item);

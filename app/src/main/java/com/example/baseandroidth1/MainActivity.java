@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.baseandroidth1.model.Item;
 import com.example.baseandroidth1.model.ItemAdapter;
+import com.example.baseandroidth1.utils.DateUtils;
 
 import java.util.ArrayList;
 
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         btnSave = findViewById(R.id.btnSave);
         etSearch = findViewById(R.id.search);
         listItem = findViewById(R.id.listItem);
-        itemAdapter = new ItemAdapter(new ArrayList<>());
+        itemAdapter = new ItemAdapter(this);
         itemAdapter.setItemListener(this);
         listItem.setAdapter(itemAdapter);
         listItem.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -69,8 +70,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
     }
 
     private Item getDataInForm () {
-        Item item = new Item(etName.getText().toString(), etDate.getText().toString(),
-                etContent.getText().toString(), rbMale.isChecked());
+        Item item = new Item(etName.getText().toString(), etContent.getText().toString(), etDate.getText().toString(), rbMale.isChecked());
         return item;
     }
 
@@ -84,10 +84,12 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
     }
 
     private void saveItem () {
-        if (tvType.getText().toString().equals(getResources().getString(R.string.FORM_ADD)))
-            itemAdapter.addItem(getDataInForm());
-        else itemAdapter.setItem(getDataInForm(), getPosition());
-        resetForm();
+        if (checkAllFields()) {
+            if (tvType.getText().toString().equals(getResources().getString(R.string.FORM_ADD)))
+                itemAdapter.addItem(getDataInForm());
+            else itemAdapter.setItem(getDataInForm(), getPosition());
+            resetForm();
+        }
     }
 
     private int getPosition () {
@@ -100,5 +102,21 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         Item item = itemAdapter.getItem(position);
         item.setPosition(position);
         setDataInForm(item);
+    }
+
+    private boolean checkAllFields () {
+        if (etName.length() == 0) {
+            etName.setError("Trường này không được để chống");
+            return false;
+        }
+        if (etDate.length() == 0) {
+            etDate.setError("Trường này không được để chống");
+            return false;
+        }
+        if (!DateUtils.isValidate(etDate.getText().toString())) {
+            etDate.setError("Không đúng định dạng dd/mm/yyyy");
+            return false;
+        }
+        return true;
     }
 }
