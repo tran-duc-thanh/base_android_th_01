@@ -4,16 +4,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.baseandroidth1.model.Item;
 import com.example.baseandroidth1.model.ItemAdapter;
+import com.example.baseandroidth1.utils.DataUtils;
 import com.example.baseandroidth1.utils.DateUtils;
 
 import java.util.ArrayList;
@@ -30,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
     private RadioButton rbFemale;
     private Button btnCancel;
     private Button btnSave;
+    private ImageButton btnCalendar;
     private EditText etSearch;
     private RecyclerView listItem;
 
@@ -42,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         initView();
         btnCancel.setOnClickListener(view -> resetForm());
         btnSave.setOnClickListener(view -> saveItem());
+        btnCalendar.setOnClickListener(view -> createDatePickerDialog().show());
     }
 
     private void initView () {
@@ -53,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         rbFemale = findViewById(R.id.rbFemale);
         btnCancel = findViewById(R.id.btnCancel);
         btnSave = findViewById(R.id.btnSave);
+        btnCalendar = findViewById(R.id.btnDate);
         etSearch = findViewById(R.id.search);
         listItem = findViewById(R.id.listItem);
         itemAdapter = new ItemAdapter(this);
@@ -85,9 +93,13 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
 
     private void saveItem () {
         if (checkAllFields()) {
-            if (tvType.getText().toString().equals(getResources().getString(R.string.FORM_ADD)))
+            if (tvType.getText().toString().equals(getResources().getString(R.string.FORM_ADD))) {
                 itemAdapter.addItem(getDataInForm());
-            else itemAdapter.setItem(getDataInForm(), getPosition());
+                Toast.makeText(this, getResources().getString(R.string.message_add_success), Toast.LENGTH_SHORT).show();
+            } else {
+                itemAdapter.setItem(getDataInForm(), getPosition());
+                Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_LONG).show();
+            }
             resetForm();
         }
     }
@@ -104,17 +116,23 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         setDataInForm(item);
     }
 
+    private DatePickerDialog createDatePickerDialog() {
+        return new DatePickerDialog(this,
+                (datePicker, year, month, day) -> etDate.setText(String.format("%d/%d/%d", day, month, year)),
+                DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
+    }
+
     private boolean checkAllFields () {
-        if (etName.length() == 0) {
-            etName.setError("Trường này không được để chống");
+        if (DataUtils.isNullOrEmptyOrBlank(etName.getText().toString())) {
+            etName.setError(getResources().getString(R.string.message_error_empty));
             return false;
         }
-        if (etDate.length() == 0) {
-            etDate.setError("Trường này không được để chống");
+        if (DataUtils.isNullOrEmptyOrBlank(etDate.getText().toString())) {
+            etDate.setError(getResources().getString(R.string.message_error_empty));
             return false;
         }
         if (!DateUtils.isValidate(etDate.getText().toString())) {
-            etDate.setError("Không đúng định dạng dd/mm/yyyy");
+            etDate.setError(getResources().getString(R.string.message_error_format_date));
             return false;
         }
         return true;
