@@ -1,11 +1,14 @@
 package com.example.baseandroidth1;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -22,6 +25,7 @@ import com.example.baseandroidth1.utils.DataUtils;
 import com.example.baseandroidth1.utils.DateUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemListener {
 
@@ -36,8 +40,10 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
     private Button btnCancel;
     private Button btnSave;
     private ImageButton btnCalendar;
+    private ImageButton btnAdd;
     private EditText etSearch;
     private RecyclerView listItem;
+    private ConstraintLayout form;
 
     private ItemAdapter itemAdapter;
 
@@ -46,9 +52,14 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        btnCancel.setOnClickListener(view -> resetForm());
+        btnCancel.setOnClickListener(view -> {
+            resetForm();
+            hideForm();
+        });
         btnSave.setOnClickListener(view -> saveItem());
         btnCalendar.setOnClickListener(view -> createDatePickerDialog().show());
+        btnAdd.setOnClickListener(view -> showForm());
+        etSearch.addTextChangedListener(doSearch());
     }
 
     private void initView () {
@@ -61,12 +72,21 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         btnCancel = findViewById(R.id.btnCancel);
         btnSave = findViewById(R.id.btnSave);
         btnCalendar = findViewById(R.id.btnDate);
+        btnAdd = findViewById(R.id.btnAdd);
         etSearch = findViewById(R.id.search);
         listItem = findViewById(R.id.listItem);
+        form = findViewById(R.id.form);
+        hideForm();
         itemAdapter = new ItemAdapter(this);
-        itemAdapter.setItemListener(this);
-        listItem.setAdapter(itemAdapter);
+        createAdapter(itemAdapter, itemAdapter.getItems());
+    }
+
+    private void createAdapter (ItemAdapter adapter, List<Item> items) {
+        adapter.setItemListener(this);
+        adapter.setItems(items);
+        listItem.setAdapter(adapter);
         listItem.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        adapter.notifyDataSetChanged();
     }
 
     private void resetForm () {
@@ -75,6 +95,14 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         etDate.setText(EMPTY);
         etContent.setText(EMPTY);
         rbMale.setChecked(true);
+    }
+
+    private void hideForm () {
+        form.setVisibility(View.GONE);
+    }
+
+    private void showForm () {
+        form.setVisibility(View.VISIBLE);
     }
 
     private Item getDataInForm () {
@@ -99,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
             } else {
                 itemAdapter.setItem(getDataInForm(), getPosition());
                 Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_LONG).show();
+                hideForm();
             }
             resetForm();
         }
@@ -114,12 +143,43 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         Item item = itemAdapter.getItem(position);
         item.setPosition(position);
         setDataInForm(item);
+        showForm();
     }
 
     private DatePickerDialog createDatePickerDialog() {
         return new DatePickerDialog(this,
                 (datePicker, year, month, day) -> etDate.setText(String.format("%d/%d/%d", day, month, year)),
                 DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
+    }
+
+    private List<Item> doSearch (String keySearch) {
+        List<Item> itemsSearch = new ArrayList<>();
+        if (DataUtils.isNullOrEmptyOrBlank(keySearch) || DataUtils.isNullOrEmpty(itemAdapter.getItems()))
+            return itemAdapter.getItems();
+        itemAdapter.getItems().forEach(item -> {
+            if (item.getName().toLowerCase().contains(keySearch.toLowerCase()))
+                itemsSearch.add(item);
+        });
+        return itemsSearch;
+    }
+
+    private TextWatcher doSearch () {
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                createAdapter(itemAdapter, doSearch(etSearch.getText().toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        };
     }
 
     private boolean checkAllFields () {
