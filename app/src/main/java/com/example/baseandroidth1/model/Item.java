@@ -4,6 +4,9 @@ import com.example.baseandroidth1.R;
 
 public class Item {
 
+    public static int count = 0;
+
+    private Integer id;
     private int img;
     private int position;
     private String name;
@@ -11,8 +14,7 @@ public class Item {
     private String date;
     private Boolean gender;
 
-    public Item() {
-    }
+    public Item() {}
 
     public Item(String name, String content, String date, Boolean gender) {
         this.img = gender ? R.drawable.icon_male : R.drawable.icon_girl;
@@ -20,6 +22,14 @@ public class Item {
         this.content = content;
         this.date = date;
         this.gender = gender;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public int getImg() {

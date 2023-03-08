@@ -19,6 +19,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.baseandroidth1.dbFake.TblItem;
 import com.example.baseandroidth1.model.Item;
 import com.example.baseandroidth1.model.ItemAdapter;
 import com.example.baseandroidth1.utils.DataUtils;
@@ -78,19 +79,19 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         form = findViewById(R.id.form);
         hideForm();
         itemAdapter = new ItemAdapter(this);
-        createAdapter(itemAdapter, itemAdapter.getItems());
+        itemAdapter.setItemListener(this);
+        listItem.setAdapter(itemAdapter);
+        listItem.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        tvType.setVisibility(View.GONE);
     }
 
     private void createAdapter (ItemAdapter adapter, List<Item> items) {
-        adapter.setItemListener(this);
         adapter.setItems(items);
-        listItem.setAdapter(adapter);
-        listItem.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         adapter.notifyDataSetChanged();
     }
 
     private void resetForm () {
-        tvType.setText(getResources().getString(R.string.FORM_ADD));
+        tvType.setText(EMPTY);
         etName.setText(EMPTY);
         etDate.setText(EMPTY);
         etContent.setText(EMPTY);
@@ -107,11 +108,14 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
 
     private Item getDataInForm () {
         Item item = new Item(etName.getText().toString(), etContent.getText().toString(), etDate.getText().toString(), rbMale.isChecked());
+        if (!DataUtils.isNullOrEmpty(tvType.getText().toString())) {
+            item.setId(Integer.parseInt(tvType.getText().toString()));
+        }
         return item;
     }
 
     private void setDataInForm (Item item) {
-        tvType.setText(String.format("%s: %d", getResources().getString(R.string.FORM_UPDATE), item.getPosition()));
+        tvType.setText(String.valueOf(item.getId()));
         etName.setText(item.getName());
         etDate.setText(item.getDate());
         etContent.setText(item.getContent());
@@ -121,11 +125,15 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
 
     private void saveItem () {
         if (checkAllFields()) {
-            if (tvType.getText().toString().equals(getResources().getString(R.string.FORM_ADD))) {
-                itemAdapter.addItem(getDataInForm());
+            Item item = getDataInForm();
+            if (DataUtils.isNullOrEmpty(item.getId())) {
+                item.setId(++Item.count);
+                itemAdapter.addItem(item);
+                createAdapter(itemAdapter, TblItem.getData());
                 Toast.makeText(this, getResources().getString(R.string.message_add_success), Toast.LENGTH_SHORT).show();
             } else {
-                itemAdapter.setItem(getDataInForm(), getPosition());
+                itemAdapter.setItem(item);
+                createAdapter(itemAdapter, TblItem.getData());
                 Toast.makeText(this, getResources().getString(R.string.message_update_success), Toast.LENGTH_LONG).show();
                 hideForm();
             }
@@ -133,15 +141,9 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         }
     }
 
-    private int getPosition () {
-        String[] arr = tvType.getText().toString().split("\\s");
-        return Integer.parseInt(arr[arr.length - 1]);
-    }
-
     @Override
     public void onClickItem(View view, int position) {
         Item item = itemAdapter.getItem(position);
-        item.setPosition(position);
         setDataInForm(item);
         showForm();
     }
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
     private List<Item> doSearch (String keySearch) {
         List<Item> itemsSearch = new ArrayList<>();
         if (DataUtils.isNullOrEmptyOrBlank(keySearch) || DataUtils.isNullOrEmpty(itemAdapter.getItems()))
-            return itemAdapter.getItems();
+            return TblItem.getData();
         itemAdapter.getItems().forEach(item -> {
             if (item.getName().toLowerCase().contains(keySearch.toLowerCase()))
                 itemsSearch.add(item);
@@ -167,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         return new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -177,7 +178,6 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
 
             @Override
             public void afterTextChanged(Editable editable) {
-
             }
         };
     }

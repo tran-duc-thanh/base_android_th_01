@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.baseandroidth1.R;
+import com.example.baseandroidth1.dbFake.TblItem;
 import com.example.baseandroidth1.utils.DialogUtils;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         AlertDialog.Builder builder = DialogUtils.createAlertDialog(context, NOTIFY,
                 String.format("%s: %s", MESSAGE_NOTIFY_DELETE, item.getName()), R.drawable.icon_notify);
         builder.setPositiveButton("Yes", (dialogInterface, i) -> {
-            items.remove(position);
+            TblItem.deleteData(items.get(position).getId());
             notifyDataSetChanged();
         });
         builder.setNegativeButton("No", (dialogInterface, i) -> {});
@@ -82,13 +83,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     }
 
     public void addItem (Item item) {
-        if (item != null) items.add(item);
-        notifyDataSetChanged();
+        if (item != null) TblItem.addData(item);
     }
 
-    public void setItem (Item item, int position) {
-        if (item != null) items.set(position, item);
-        notifyDataSetChanged();
+    public void setItem (Item item) {
+        if (item != null) TblItem.updateData(item);
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
