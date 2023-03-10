@@ -10,9 +10,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
@@ -80,13 +78,14 @@ public class MainActivity extends AppCompatActivity implements ItemAdapter.ItemL
         hideForm();
         itemAdapter = new ItemAdapter(this);
         itemAdapter.setItemListener(this);
-        listItem.setAdapter(itemAdapter);
-        listItem.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        createAdapter(itemAdapter, TblItem.getData());
         tvType.setVisibility(View.GONE);
     }
 
     private void createAdapter (ItemAdapter adapter, List<Item> items) {
         adapter.setItems(items);
+        listItem.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        listItem.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
 

@@ -58,7 +58,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         Item item = items.get(position);
         if (item == null) return;
         holder.circleImageView.setImageResource(item.getImg());
-        holder.textView.setText(item.getName());
+        holder.textView.setText(String.format("%s-%s", item.getName(), item.getDate()));
         holder.btnDelete.setOnClickListener(view -> removeItem(position));
     }
 
@@ -74,7 +74,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         AlertDialog.Builder builder = DialogUtils.createAlertDialog(context, NOTIFY,
                 String.format("%s: %s", MESSAGE_NOTIFY_DELETE, item.getName()), R.drawable.icon_notify);
         builder.setPositiveButton("Yes", (dialogInterface, i) -> {
-            TblItem.deleteData(items.get(position).getId());
+            TblItem.deleteData(items.remove(position).getId());
             notifyDataSetChanged();
         });
         builder.setNegativeButton("No", (dialogInterface, i) -> {});
